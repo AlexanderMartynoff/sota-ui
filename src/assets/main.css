@@ -1,5 +1,5 @@
 @import "tailwindcss";
 
-.absolute-full {
+@utility x-absolute-full {
   @apply h-full w-full absolute;
 }

@@ -1,18 +1,25 @@
 <template>
-  <div class="x-layout--footer border-t-1 border-t-gray-200" :class="classes">
+  <div class="x-layout__footer overflow-y-auto border-t-gray-200" :class="[classes, {'border-t-1': bordered}]" :data-view="view" v-if="slots.default">
     <slot/>
   </div>
 </template>
 
 
 <script lang="ts" setup>
-import { inject } from 'vue'
+import { inject, computed, useSlots } from 'vue'
 import type { ComputedRef } from 'vue'
 
+defineProps<{bordered?: boolean}>()
 
-const classes = inject<ComputedRef<string[]>>('layout/footer/classes')
+const slots = useSlots()
+const view = inject<ComputedRef<'shh-scc-sff' | 'hhh-ccc'>>('view')
 
-if (classes == undefined) {
-  throw new Error('Component "LayoutFooter" must be use only as "Layout" child')
+const views: {
+  [key in 'shh-scc-sff' | 'hhh-ccc']: string[]
+} = {
+  'shh-scc-sff': ['row-start-3', 'row-end-4', 'col-start-2', 'col-end-3'],
+  'hhh-ccc': ['row-start-3', 'row-end-4', 'col-start-1', 'col-end-3'],
 }
+
+const classes = computed(() => view?.value ? views[view.value] : [])
 </script>

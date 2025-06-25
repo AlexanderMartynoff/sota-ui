@@ -1,5 +1,5 @@
 <template>
-  <ul class="h-full px-3 py-4 overflow-y-auto">
+  <ul class="h-full p-1 overflow-y-auto">
     <slot/>
   </ul>
 </template>
