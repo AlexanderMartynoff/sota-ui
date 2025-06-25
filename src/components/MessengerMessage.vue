@@ -1,41 +1,34 @@
 <template>
-  <div :data-mode="mode" class="flex gap-2.5 data-[mode='sended']:flex-row-reverse group" :class="classes">
+  <div :data-mode="mode" class="flex gap-2.5 data-[mode='sended']:flex-row-reverse group my-2">
     <div class="flex-none">
       <slot name="icon"/>
     </div>
-    <div :data-mode="mode" class="flex flex-col p-3 data-[mode='received']:rounded-tl-none data-[mode='sended']:rounded-tr-none rounded-xl mb-3 bg-gray-50 border-gray-200 border">
-      <div class="flex space-x-2">
-        <span class="text-sm font-semibold text-gray-900">{{name}}</span>
-        <span class="text-sm font-normal text-gray-500">{{datetime}}</span>
+    <div :data-mode="mode" class="overflow-x-auto flex flex-col p-4 data-[mode='received']:rounded-tl-none data-[mode='sended']:rounded-tr-none rounded-3xl bg-white border-gray-200 border">
+      <div class="flex space-x-2 overflow-x-auto">
+        <span class="text-sm font-semibold text-gray-900">
+          {{name}}
+        </span>
+        <span class="text-sm font-normal text-gray-500">
+          {{datetime}}
+        </span>
+        <span class="flex-auto"></span>
+        <span :data-mode="mode" class="data-[mode='received']:hidden">
+          <EnvelopeOpenIcon :data-mode="mode" class="text-blue-500 size-4"/>          
+        </span>
       </div>
-      <p class="text-lg font-normal pt-2 text-gray-900">
+      <p class="text-lg font-normal text-gray-900 overflow-x-auto flex-auto break-normal break-words whitespace-normal">
         {{message}}
       </p>
-      <div :data-mode="mode" class="text-sm font-normal text-gray-500 flex data-[mode='received']:hidden data-[mode='sended']:flex-row-reverse">
-        <EyeIcon class="size-5"/>
-      </div>
     </div>
-    <div class="flex flex-col items-center">
-      <EllipsisHorizontalCircleIcon class="cursor-pointer invisible group-hover:visible flex size-7 text-gray-500"/>
+    <div class="flex flex-col">
+      <EllipsisVerticalIcon class="cursor-pointer mt-3 invisiblee size-7 text-gray-500"/>
     </div>
   </div>
 </template>
 
 
 <script lang="ts" setup>
-import  { computed } from 'vue'
-import { EyeIcon, EllipsisHorizontalIcon, EllipsisHorizontalCircleIcon } from '@heroicons/vue/24/outline'
+import { EnvelopeOpenIcon, EllipsisVerticalIcon } from '@heroicons/vue/24/solid'
 
-const props = defineProps<{name: string, message: string, datetime: string, mode: 'sended' | 'received'}>()
-
-const classes = computed(() => {
-  return {
-    'flex-row-reverse': props.mode == 'sended',
-  }
-})
+const props = defineProps<{name: string, message?: string, datetime: string, mode: 'sended' | 'received'}>()
 </script>
-
-
-<style lang="scss">
-
-</style>

@@ -1,10 +1,9 @@
 <template>
-  <div :class="`px-2 flex h-16 items-center ${mode}`">
+  <div class="flex items-center">
     <slot/>
   </div>
 </template>
 
 
 <script lang="ts" setup>
-const props = defineProps<{mode?: 'justify-between'}>()
 </script>

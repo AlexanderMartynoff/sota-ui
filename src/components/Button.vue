@@ -1,11 +1,13 @@
 <template>
-  <button type="button" class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:ring-2 focus:ring-white focus:outline-hidden focus:ring-inset cursor-pointer" @click="onClick">
+  <button type="button" class="h-13 p-1 flex items-center justify-center text-gray-600 hover:text-gray-900 cursor-pointer" :class="[{'mx-2': toolbar}]" @click="onClick">
     <slot/>
   </button>
 </template>
 
 
 <script lang="ts" setup>
+defineProps<{toolbar?: boolean}>()
+
 const emit = defineEmits(['click'])
 
 function onClick() {

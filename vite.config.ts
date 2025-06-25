@@ -9,6 +9,20 @@ export default defineConfig({
   server: {
     port: 8080,
     allowedHosts: true,
+
+    proxy: {
+      '/v1/serve': {
+        target: 'ws://localhost:9000',
+        ws: true,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/v1/api': {
+        target: 'http://localhost:9000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   plugins: [
     vue(),
