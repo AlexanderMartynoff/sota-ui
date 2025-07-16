@@ -1,6 +1,6 @@
 <template>
   <Layout view="hhh-ccc">
-    <LayoutHeader paddings class="bg-gray-100">
+    <LayoutHeader padding class="bg-gray-100" bordered="b">
       <Toolbar>
         <Button toolbar>
           <MagnifyingGlassIcon class="size-8" @click="search = !search"/>

@@ -1,7 +1,7 @@
 <template>
-  <div :data-mode="mode" class="flex gap-2.5 data-[mode='sended']:flex-row-reverse group my-2">
+  <div :data-mode="mode" class="flex gap-2 data-[mode='sended']:flex-row-reverse group m-2">
     <div class="flex-none">
-      <slot name="icon"/>
+      <slot name="icon" />
     </div>
     <div :data-mode="mode" class="overflow-x-auto flex flex-col p-4 data-[mode='received']:rounded-tl-none data-[mode='sended']:rounded-tr-none rounded-3xl bg-white border-gray-200 border">
       <div class="flex space-x-2 overflow-x-auto">
@@ -30,5 +30,5 @@
 <script lang="ts" setup>
 import { EnvelopeOpenIcon, EllipsisVerticalIcon } from '@heroicons/vue/24/solid'
 
-const props = defineProps<{name: string, message?: string, datetime: string, mode: 'sended' | 'received'}>()
+defineProps<{name: string, message?: string, datetime: string, mode: 'sended' | 'received'}>()
 </script>

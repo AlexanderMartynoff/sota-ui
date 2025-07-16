@@ -1,5 +1,5 @@
 <template>
-  <div class="x-layout__footer overflow-y-auto border-t-gray-200 relative" :class="[classes, {'border-t-1': bordered}]" :data-view="view" v-if="slots.default">
+  <div class="x-layout__footer overflow-auto border-gray-200 relative" :class="[classes, {'border-t-1': bordered == 't', 'border border-t-0': bordered == 'lrb'}]" :data-view="view" v-if="slots.default">
     <slot/>
   </div>
 </template>
@@ -9,7 +9,7 @@
 import { inject, computed, useSlots } from 'vue'
 import type { ComputedRef } from 'vue'
 
-defineProps<{bordered?: boolean}>()
+defineProps<{bordered?: 'lrb' | 't'}>()
 
 const slots = useSlots()
 const view = inject<ComputedRef<'shh-scc-sff' | 'hhh-ccc' | 'hhh-ccc-fff'>>('view')

@@ -1,6 +1,6 @@
 <template>
-  <div class="x-layout__content relative overflow-hidden" :class="[classes]" :data-view="view">
-    <div class="x-layout__content__scroll-area absolute size-full @container" :class="{'overflow-auto': scroll == 'auto', 'overflow-scroll': scroll == 'scroll'}" ref="element">
+  <div class="x-layout__content relative overflow-auto" :class="[classes, {'border-y-1': bordered == 'lr', 'border': bordered == 'ltrb'}]" :data-view="view">
+    <div class="x-layout__content__scroll-area overflow-auto absolute size-full @container" :class="{'p-2': padding}" ref="element">
       <slot/>
     </div>
     <slot name="sticky"/>
@@ -9,12 +9,11 @@
 
 
 <script lang="ts" setup>
-import { inject, computed, useSlots, useTemplateRef } from 'vue'
+import { inject, computed, useTemplateRef } from 'vue'
 import type { ComputedRef } from 'vue'
 
-defineProps<{scroll: 'auto' | 'scroll'}>()
+defineProps<{padding?: boolean, bordered?: 'ltrb' | 'lr'}>()
 
-const slots = useSlots()
 const element = useTemplateRef('element')
 
 const view = inject<ComputedRef<'shh-scc-sff' | 'hhh-ccc' | 'hhh-ccc-fff'>>('view')

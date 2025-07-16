@@ -1,5 +1,5 @@
 <template>
-  <div class="x-layout__header overflow-y-auto border-b-1 border-b-gray-200 relative" :class="[classes, {'p-1': paddings}]" :data-view="view" v-if="slots.default">
+  <div class="x-layout__header overflow-y-auto border-gray-200 relative" :class="[classes, {'p-1': padding, 'border-b-1': bordered == 'b', 'border border-b-0': bordered == 'ltr'}]" :data-view="view" v-if="slots.default">
     <slot/>
   </div>
 </template>
@@ -10,7 +10,7 @@ import { inject, computed, useSlots } from 'vue'
 import type { ComputedRef } from 'vue'
 
 
-defineProps<{paddings?: boolean}>()
+defineProps<{padding?: boolean, bordered?: 'ltr' | 'b'}>()
 
 const slots = useSlots()
 

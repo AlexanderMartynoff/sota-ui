@@ -3,7 +3,7 @@
     <LayoutContent ref="scrolling" :key="chat.id" scroll="auto" class="bg-gray-50">
       <MessengerMessage :name="message.senderName" :message="message.text" datetime="00:00" mode="sended" v-for="message in messages" :key="message.id" v-memo="[message.stage, message.text]">
         <template #icon>
-          <UserCircleIcon class="text-gray-300 size-12"/>
+          <Avatar size="xs" :file="store.account.avatar"/>
         </template>
       </MessengerMessage>
 
@@ -12,7 +12,7 @@
       </template>
     </LayoutContent>
 
-    <LayoutFooter bordered class="bg-gray-100">
+    <LayoutFooter class="bg-gray-100" bordered="t">
       <MessengerToolbar @send-btn-click="onSendBtnClick"/>
     </LayoutFooter>
   </Layout>
@@ -22,12 +22,12 @@
 <script lang="ts" setup>
 import { v4 as uuid4 } from 'uuid'
 import { ref, inject, nextTick, onMounted, onUnmounted, useTemplateRef } from 'vue'
-import { UserCircleIcon } from '@heroicons/vue/24/solid'
 import type { Chat, IDB, MessageRelations, Message } from '../types.ts'
 import { TaskStates, RecordType, MessageStage } from '../types.ts'
 import { Emitter, onEmit } from '../library/emitter.ts'
 import { Scroller } from '../library/scroller.ts'
 import * as db from '../library/idb'
+import Avatar from '../components/Avatar.vue'
 import { useStore } from '../stores/messenger'
 import Layout from './layout/Layout.vue'
 import LayoutFooter from './layout/LayoutFooter.vue'

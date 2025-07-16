@@ -1,6 +1,6 @@
 <template>
   <Layout view="hhh-ccc">
-    <LayoutHeader paddings :class="{'hidden': !search}">
+    <LayoutHeader padding :class="{'hidden': !search}" bordered="b">
       <Toolbar mode="justify-between">
         <FormInput v-model:text="filter" size="md">
           <template #prepend>

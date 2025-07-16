@@ -1,6 +1,6 @@
 <template>
   <Layout view="shh-scc-sff">
-    <LayoutHeader paddings class="bg-gray-100">
+    <LayoutHeader padding class="bg-gray-100" bordered="b">
       <Toolbar>
         <Button @click="onContactsBtnClick" class="@2xl:hidden" toolbar>
           <ChevronDoubleLeftIcon class="size-8"/>

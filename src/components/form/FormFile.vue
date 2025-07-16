@@ -50,6 +50,8 @@ function onClick() {
   element.value?.click()
 }
 
+const emits = defineEmits(['change'])
+
 function onChange(event: Event) {
   const element = event.target as HTMLInputElement
 
@@ -58,5 +60,7 @@ function onChange(event: Event) {
   }
 
   file.value = element.files[0]
+
+  emits('change', file.value)
 }
 </script>

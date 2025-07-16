@@ -47,18 +47,24 @@ function useCropper(opts: {container: string, template: string}) {
     },
 
     save(width: number, height: number) {
-      if (cropper === null) {
+      if (cropper == null) {
         throw new Error()
       }
 
-      return cropper.getCropperSelection()?.$toCanvas({
+      const selection = cropper.getCropperSelection()
+
+      if (selection == null) {
+        throw new Error()
+      }
+
+      return selection.$toCanvas({
         width,
         height,
       })
     },
 
     refresh() {
-      if (cropper === null) {
+      if (cropper == null) {
         return
       }
 

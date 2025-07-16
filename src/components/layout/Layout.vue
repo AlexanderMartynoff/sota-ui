@@ -1,5 +1,5 @@
 <template>
-  <div class="x-layout size-full  size-full grid" :class="classes" :data-name="name" :data-view="view">
+  <div class="x-layout size-full grid" :class="classes" :data-name="name" :data-view="view">
     <slot/>
   </div>
 </template>
