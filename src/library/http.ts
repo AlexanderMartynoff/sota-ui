@@ -52,7 +52,7 @@ async function signInAccount(login: string, secret: string, device: { id: string
   })
 }
 
-async function getAccount(id: string): Promise<Account | void> {
+async function fetchAccount(id: string): Promise<Account | undefined> {
   const response = await fetch(`/v1/api/user?id=${id}`, {
     method: 'GET',
   })
@@ -85,5 +85,5 @@ export {
   updateAccount,
   signUpAccount,
   signInAccount,
-  getAccount,
+  fetchAccount,
 }

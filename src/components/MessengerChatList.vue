@@ -45,7 +45,7 @@ import { hash } from '../library/functions.ts'
 import { useStore } from '../stores/messenger.ts'
 import type { Chat, User, IDB, ChatRelations } from '../types.ts'
 import { Emitter, onEmit } from '../library/emitter.ts'
-import  { ChatType } from '../types.ts'
+import  { ChatTypes } from '../types.ts'
 import { FetchDebouncer } from '../library/fetch-debouncer.ts'
 import * as db from '../library/idb'
 
@@ -133,7 +133,7 @@ const chats = computed(() => {
       id: hash(store.account.id, remoteUser.id),
       name: remoteUser.name,
       chanel: remoteUser.id,
-      type: ChatType.User,
+      type: ChatTypes.User,
     })
   }
 

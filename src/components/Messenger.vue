@@ -3,7 +3,7 @@
     <LayoutContent ref="scrolling" :key="chat.id" scroll="auto" class="bg-gray-50">
       <MessengerMessage :name="message.senderName" :message="message.text" :datetime="message.createTime" :mode="store.account.id == message.sender?.id ? 'sended' : 'received'" v-for="message in messages" :key="message.id" :stage="message.stage" v-memo="[message.stage, message.text]">
         <template #icon>
-          <Avatar size="xs" :file="store.account.avatar"/>
+          <Avatar size="xs" :file="store.account.avatar" online="off"/>
         </template>
       </MessengerMessage>
 
@@ -23,7 +23,7 @@
 import { v4 as uuid4 } from 'uuid'
 import { ref, inject, nextTick, onMounted, onUnmounted, useTemplateRef } from 'vue'
 import type { Chat, IDB, MessageRelations, Message } from '../types.ts'
-import { TaskStates, RecordType, MessageStage } from '../types.ts'
+import { TaskStates, RecordTypes, MessageStage, TaskTypes } from '../types.ts'
 import { Emitter, onEmit } from '../library/emitter.ts'
 import { Scroller } from '../library/scroller.ts'
 import * as db from '../library/idb'
@@ -105,9 +105,10 @@ async function onSendBtnClick({ text }: {text: string}) {
       state: TaskStates.Ready,
       changeStateTime: Date.now(),
       createTime: Date.now(),
+      type: TaskTypes.SendMessage,
       payload: {
         message,
-        type: RecordType.UserMessage,
+        type: RecordTypes.UserMessage,
         chanel: props.chat.chanel,
       },
     }

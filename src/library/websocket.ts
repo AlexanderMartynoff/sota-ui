@@ -1,6 +1,6 @@
 import type { IDBPDatabase } from 'idb'
 import type { InputPackage, OutputPackage, CommandMessage, Message, StageMessage, Event, Heartbeat, Task } from '../types'
-import { TaskStates, RecordType } from '../types'
+import { TaskStates, RecordTypes, TaskTypes } from '../types'
 import { Emitter } from './emitter'
 import * as db from './idb'
 
@@ -30,14 +30,11 @@ class WebSocketQueue {
   private readonly url: string
   private socket?: WebSocket
   readonly emitter: Emitter
-  private readonly idb: IDBPDatabase<any>
 
   private readonly waiters: Map<string, {resolve: (message: any) => void, reject: (reason?: any) => void}>
 
-  constructor(url: string, idb: IDBPDatabase<any>, heartbeatTimeout: number, messageTimeout: number = 50_000, reopenTimeout: number = 5_000) {
-
+  constructor(url: string, heartbeatTimeout: number = 30_000, messageTimeout: number = 30_000, reopenTimeout: number = 5_000) {
     this.url = url
-    this.idb = idb
     this.emitter = new Emitter()
     this.waiters = new Map()
 
@@ -49,15 +46,13 @@ class WebSocketQueue {
     this.emitter.on('websocket-open', () => {
       console.debug('[WS] Open connection')
 
-      this.flush()
-
       if (this.heartbeatTimeout > 0) {
         // immitate heartbeat message from server for sending heartbeat back to server
         console.debug('[WS] Enable heartbeat')
 
         this.emitter.emit('stage-message', {
-          type: RecordType.StageMessage,
-          message: {messageId: RecordType.HeartbeatMessage},
+          type: RecordTypes.StageMessage,
+          message: {messageId: RecordTypes.HeartbeatMessage},
         })
       }
     })
@@ -67,7 +62,7 @@ class WebSocketQueue {
 
       waiter?.resolve(pkg)
 
-      if (pkg.message.messageId != RecordType.HeartbeatMessage) {
+      if (pkg.message.messageId != RecordTypes.HeartbeatMessage) {
         return
       }
 
@@ -76,9 +71,9 @@ class WebSocketQueue {
       this.heartbeatTimer = window.setTimeout(() => {
 
         this.send({
-          type: RecordType.HeartbeatMessage,
+          type: RecordTypes.HeartbeatMessage,
           message: {
-            id: RecordType.HeartbeatMessage,
+            id: RecordTypes.HeartbeatMessage,
           },
         })
       }, this.heartbeatTimeout)
@@ -182,18 +177,6 @@ class WebSocketQueue {
     if (awaitable) {
       this.wait(pkg.message.id)
     }
-  }
-
-  async flush() {
-    await db.run(async scope => {
-      for await (const { task, update } of db.selectTasks(scope, this.messageTimeout)) {
-        this.send(task.payload)
-
-        update({
-          state: TaskStates.Await,
-        })
-      }
-    }, this.idb, ['tasks'], 'readwrite')
   }
 
   private wait(id: string): void {

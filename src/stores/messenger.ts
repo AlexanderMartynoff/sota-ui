@@ -17,6 +17,7 @@ const useStore = defineStore('store', () => {
     id: uuid4(),
     deviceId: uuid4(),
     deviceName: navigator.userAgent,
+    online: false,
   } as Account)
 
   const activeAccountId = localStorage.getItem(activeAccountIdKey)
@@ -48,7 +49,7 @@ const useStore = defineStore('store', () => {
     Object.assign(account, value)
 
     // websocket.send({
-    //   type: RecordType.CommandMessage,
+    //   type: RecordTypes.CommandMessage,
     //   message: {
     //     id: uuid4(),
     //     command: 'account.update',

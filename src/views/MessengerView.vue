@@ -32,7 +32,7 @@
 <script lang="ts" setup>
 import { ref, watch, inject } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { ChatType, type Chat, type IDB } from '../types.ts'
+import { ChatTypes, type Chat, type IDB } from '../types.ts'
 import { UserCircleIcon, ChevronDoubleLeftIcon, Cog8ToothIcon } from '@heroicons/vue/24/outline'
 import Messenger from '../components/Messenger.vue'
 import Toolbar from '../components/Toolbar.vue'
@@ -56,7 +56,7 @@ const chat = ref<Chat>({
   id: '0',
   name: '0',
   chanel: '0',
-  type: ChatType.User,
+  type: ChatTypes.User,
 })
 
 watch(() => props.chatId, async () => {
@@ -73,7 +73,7 @@ watch(() => props.chatId, async () => {
         id: '0',
         name: '0',
         chanel: '0',
-        type: ChatType.User,
+        type: ChatTypes.User,
       }
       return
     }
@@ -82,7 +82,7 @@ watch(() => props.chatId, async () => {
   chat.value = {
     id: route.query.id as string,
     name: route.query.name as string,
-    type: route.query.type as ChatType,
+    type: route.query.type as ChatTypes,
     chanel: route.query.chanel as string
   }
 }, { immediate: true })

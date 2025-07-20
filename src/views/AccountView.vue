@@ -19,7 +19,7 @@
     <LayoutContent scroll="auto" class="bg-gray-50" padding>
       <div class="flex flex-col items-center w-full">
         <div class="my-5 flex items-center gap-2">
-          <Avatar size="xs" :file="values.avatar"/>
+          <Avatar size="xs" :file="values.avatar" :online="store.account.online"/>
           <span class="text-2xl text-gray-700 truncate">{{store.account.name}}</span>
         </div>
         <form class="max-w-lg w-full">

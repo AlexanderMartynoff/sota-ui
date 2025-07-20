@@ -61,7 +61,7 @@ interface Heartbeat {
   id: string
 }
 
-enum EventType {
+enum EventTypes {
   OnSendMessage = 'event-on-send',
 }
 
@@ -70,18 +70,18 @@ interface Settings {
 }
 
 interface Event {
-  type: EventType
+  type: EventTypes
 }
 
 interface OnMessageSendedEvent<T extends Message | StageMessage | Event | ServerError> {
-  type: EventType
+  type: EventTypes
   // fields contans data about message that was sended
   packageMessage: T
-  packageType: RecordType
+  packageType: RecordTypes
 }
 
 // subcommands
-enum RecordType {
+enum RecordTypes {
   UserMessage = 'user-message',
   StageMessage = 'stage-message',
   HeartbeatMessage = 'heartbeat',
@@ -89,12 +89,12 @@ enum RecordType {
 }
 
 interface InputPackage<T extends Message | StageMessage | Event | Heartbeat | CommandMessage> {
-  type: RecordType
+  type: RecordTypes
   message: T
 }
 
 interface OutputPackage<T extends Message | StageMessage | Heartbeat | CommandMessage> {
-  type: RecordType
+  type: RecordTypes
   message: T
   chanel?: string
 }
@@ -116,7 +116,7 @@ interface Account {
   avatarSrc?: String
   signed?: boolean
   active?: boolean
-  online?: boolean
+  online: boolean
 }
 
 interface User {
@@ -128,7 +128,7 @@ interface RuntimeUser extends User {
   online: boolean
 }
 
-enum ChatType {
+enum ChatTypes {
   User = 'user',
   Group = 'group',
 }
@@ -138,7 +138,7 @@ interface Chat {
   name: string
   // for type==User channel value is user ID
   chanel: string
-  type: ChatType
+  type: ChatTypes
   avatar?: File,
   // description?: string
   unreadCount?: number
@@ -197,29 +197,33 @@ enum TaskStates {
 }
 
 enum TaskTypes {
-  Send = 'Send',
-  Fetch = 'Fetch',
+  SendMessage = 'send-message',
+  LoadAccount = 'load-account',
+}
+
+enum TaskFetchActions {
+  FetchAccount = 'fetch-account',
 }
 
 type Task<T = any> = {
   id: string
   state: TaskStates
   createTime: number
-  type?: TaskTypes
+  type: TaskTypes
   changeStateTime: number
   payload: T
-
-  // setup?: (payload: any) => void
 }
 
 type IDB = IDBPDatabase<DatabseSchema>
 
 export {
-  RecordType,
+  RecordTypes,
   TaskStates,
   MessageStage,
-  ChatType,
-  EventType,
+  ChatTypes,
+  EventTypes,
+  TaskTypes,
+  TaskFetchActions,
 }
 
 export type {

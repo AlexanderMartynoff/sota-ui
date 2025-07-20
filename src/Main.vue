@@ -8,7 +8,8 @@ import { v4 as uuid4 } from 'uuid'
 import { watch, inject } from 'vue'
 import { useStore } from './stores/messenger.ts'
 import { Emitter, onEmit } from './library/emitter.ts'
-import { MessageStage, RecordType, ChatType, TaskStates, EventType } from './types'
+import { TaskExecutor } from './library/task-executor.ts'
+import { MessageStage, RecordTypes, ChatTypes, TaskStates, EventTypes, TaskTypes } from './types'
 import type { IDB, InputPackage, StageMessage, Message, Event, ServerError, OnMessageSendedEvent } from './types'
 import { WebSocketQueue } from './library/websocket.ts'
 import * as db from './library/idb'
@@ -17,6 +18,7 @@ import * as db from './library/idb'
 const websocket = inject<WebSocketQueue>('websocket') as WebSocketQueue
 const idb = inject<IDB>('idb') as IDB
 const emitter = inject<Emitter>('emitter') as Emitter
+const executor = inject<TaskExecutor>('executor') as TaskExecutor
 
 const store = useStore()
 
@@ -29,7 +31,7 @@ watch(() => store.account.signed, signed => {
 
 const onEvent = (record: InputPackage<Event>) => {
   switch (record.message.type) {
-    case EventType.OnSendMessage:
+    case EventTypes.OnSendMessage:
       onReceiveMessageSendedEvent(record.message as OnMessageSendedEvent<Message>)
       return
   }
@@ -39,7 +41,7 @@ const onEvent = (record: InputPackage<Event>) => {
 // 1. Outcome messages from other device
 // ***
 const onReceiveMessageSendedEvent = (event: OnMessageSendedEvent<Message>) => {
-  if (event.packageType !== RecordType.UserMessage) {
+  if (event.packageType !== RecordTypes.UserMessage) {
     return
   }
 
@@ -58,7 +60,7 @@ const onReceiveMessageSendedEvent = (event: OnMessageSendedEvent<Message>) => {
         id: message.chatId,
         name: message.senderChatName,
         chanel: message.senderChatChannel,
-        type: ChatType.User,
+        type: ChatTypes.User,
       })
     }
 
@@ -74,8 +76,17 @@ const onReceiveMessageSendedEvent = (event: OnMessageSendedEvent<Message>) => {
 const onReceiveIncomeMessage = ({ message }: InputPackage<Message>) => {
   db.run(async scope => {
     if (await db.getAccount(scope, message.senderId) == undefined) {
-      // download account later
-      // db.addTask(scope, {} as Task)
+      // download account by task executor
+      db.addTask(scope, {
+        id: uuid4(),
+        createTime: Date.now(),
+        changeStateTime: Date.now(),
+        state: TaskStates.Ready,
+        type: TaskTypes.LoadAccount,
+        payload: {
+          id: message.senderId,
+        },
+      })
     }
 
     if (await db.getChat(scope, message.chatId) == undefined) {
@@ -83,7 +94,7 @@ const onReceiveIncomeMessage = ({ message }: InputPackage<Message>) => {
         id: message.chatId,
         name: message.senderName,
         chanel: message.senderId,
-        type: ChatType.User,
+        type: ChatTypes.User,
       })
     }
 
@@ -98,8 +109,9 @@ const onReceiveIncomeMessage = ({ message }: InputPackage<Message>) => {
         createTime: Date.now(),
         changeStateTime: Date.now(),
         state: TaskStates.Ready,
+        type: TaskTypes.SendMessage,
         payload: {
-          type: RecordType.StageMessage,
+          type: RecordTypes.StageMessage,
           chanel: message.senderId,
           message: {
             id: uuid4(),
@@ -113,39 +125,34 @@ const onReceiveIncomeMessage = ({ message }: InputPackage<Message>) => {
     emitter.emit('messages.updated', { message })
   })
 
-  if (websocket.opened) {
-    websocket.flush()
-  }
+  executor.flush()
 }
 
-// ***
-// 3. Incoming stage messages
-// ***
-const onReceiveStageMessage = (record: InputPackage<StageMessage>) => {
-  db.run(scope => {
-    db.setMessageStage(scope, record.message)
-    db.deleteTasks(scope, task => task.payload.message?.id == record.message.messageId)
-  }, idb, ['messages', 'tasks'], 'readwrite').then(() => {
-    emitter.emit('messages.stage.changed', record.message)
-  })
-}
 
 const onServerError = async ({ message }: { message: ServerError }) => {
   console.error('Server error:', message.error)
 }
 
 const onOpen = () => {
-  store.account.online = true
 }
 
 const onClose = () => {
-  store.account.online = false
 }
 
 // database events
 onEmit('tasks.created', () => {
-  websocket.flush()
+  executor.flush()
 }, emitter)
+
+
+onEmit('websocket-open', () => {
+  store.account.online = true
+  executor.flush()
+}, websocket.emitter)
+
+onEmit('websocket-close', () => {
+  store.account.online = false
+}, websocket.emitter)
 
 // websocket events
 onEmit('server-error', (event) => {
@@ -156,19 +163,8 @@ onEmit('user-message', (event) => {
   onReceiveIncomeMessage(event)
 }, websocket.emitter)
 
-onEmit('stage-message', (event) => {
-  onReceiveStageMessage(event)
-}, websocket.emitter)
-
 onEmit('event', (event) => {
   onEvent(event)
 }, websocket.emitter)
 
-onEmit('websocket-open', () => {
-  onOpen()
-}, websocket.emitter)
-
-onEmit('websocket-close', () => {
-  onClose()
-}, websocket.emitter)
 </script>

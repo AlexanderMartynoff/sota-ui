@@ -1,5 +1,5 @@
 import type { Account, Message, MessageRelations, Chat, StageMessage, Task, DatabseSchema, ChatRelations } from '../../types'
-import { TaskStates } from '../../types'
+import { TaskStates, TaskTypes } from '../../types'
 
 import type { Scope } from './scope'
 
@@ -172,18 +172,20 @@ async function deleteTasks(scope: Scope<DatabseSchema, ['tasks'], 'readwrite'>, 
   }
 }
 
-async function *selectTasks(scope: Scope<DatabseSchema, ['tasks'], 'readwrite'>, timeout: number): AsyncGenerator<{task: Task<any>, update: (values: Partial<Task>) => void}> {
+async function *selectTasks(scope: Scope<DatabseSchema, ['tasks'], 'readwrite'>, timeout: number, types: TaskTypes[]): AsyncGenerator<{task: Task<any>, update: (values: Partial<Task>) => void}> {
   for await (const cursor of scope.tasks.iterate()) {
-    if (cursor.value.state == TaskStates.Ready || cursor.value.state == TaskStates.Await && Date.now() - cursor.value.changeStateTime > timeout) {
-      yield {
-        task: cursor.value,
-        update: (values: Partial<Task>) => {
-          if (values.state) {
-            values = {...values, changeStateTime: Date.now()}
-          }
-          cursor.update({...cursor.value, ...values})
-        },
-      }
+    if (!types.includes(cursor.value.type) || cursor.value.state == TaskStates.Await && Date.now() - cursor.value.changeStateTime < timeout) {
+      continue
+    }
+
+    yield {
+      task: cursor.value,
+      update: (values: Partial<Task>) => {
+        if (values.state) {
+          values = {...values, changeStateTime: Date.now()}
+        }
+        cursor.update({...cursor.value, ...values})
+      },
     }
   }
 }
