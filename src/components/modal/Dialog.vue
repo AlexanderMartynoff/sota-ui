@@ -33,10 +33,12 @@ const observer = new ResizeObserver(entries => {
 function open() {
   modal.value?.open()
 
-  nextTick().then(() => {
-    if (dialog.value) {
-      observer.observe(dialog.value)
+  nextTick(() => {
+    if (dialog.value == null) {
+      return
     }
+
+    observer.observe(dialog.value)
   })
 }
 

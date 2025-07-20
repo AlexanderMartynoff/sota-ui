@@ -4,7 +4,9 @@
       <Toolbar mode="justify-between">
         <FormInput v-model:text="filter" size="md">
           <template #prepend>
-            <FunnelIcon class="text-gray-400 w-13 flex size-8"/>
+            <Button class="w-13">
+              <ClockIcon class="text-gray-400 flex size-5" :class="{'!text-blue-400 animate-spin': pending}"/>
+            </Button>
           </template>
         </FormInput>
       </Toolbar>
@@ -12,8 +14,13 @@
     <LayoutContent scroll="auto">
       <Menu>
         <MenuItem :title="chat.name" :active="chat.id === activeChat?.id" :caption="chat.caption?.text" v-for="chat in chats" @click="onMenuItemClick(chat)">
-          <template #avatar>
-            <UserCircleIcon class="size-11 text-gray-300"/>
+          <template #prepend>
+            <UserCircleIcon class="size-11 text-gray-400"/>
+          </template>
+          <template #append>
+            <span class="text-xs text-gray-400">
+              {{chat.caption?.time ? format(chat.caption.time, 'HH:mm:ss') : '--:--'}}
+            </span>
           </template>
         </MenuItem>
       </Menu>
@@ -24,9 +31,11 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch, inject } from 'vue'
-import { UserCircleIcon, FunnelIcon } from '@heroicons/vue/24/solid'
+import { format } from 'date-fns'
+import { UserCircleIcon, ClockIcon } from '@heroicons/vue/24/outline'
 import Layout from '../components/layout/Layout.vue'
 import Toolbar from '../components/Toolbar.vue'
+import Button from '../components/Button.vue'
 import Menu from '../components/Menu.vue'
 import MenuItem from '../components/MenuItem.vue'
 import LayoutHeader from '../components/layout/LayoutHeader.vue'
@@ -44,19 +53,48 @@ import * as db from '../library/idb'
 const idb = inject<IDB>('idb') as IDB
 const emitter = inject<Emitter>('emitter') as Emitter
 
-const props = defineProps<{activeChat?: Chat, search: boolean}>()
+defineProps<{activeChat?: Chat, search: boolean}>()
 
 const emit = defineEmits(['select'])
+
+const pending = ref(false)
+
+const debouncer = new FetchDebouncer({
+  onrequest: () => {
+    remoteUsers.value = []
+    remoteChats.value = []
+    pending.value = true
+  },
+
+  onresult: ({ users, chats }: { users: User[], chats: Chat[] }) => {
+    remoteUsers.value = users || []
+    remoteChats.value = chats || []
+    pending.value = false
+  },
+
+  onerror: (error: Error) => {
+    remoteUsers.value = []
+    remoteChats.value = []
+    pending.value = false
+  },
+})
 
 const filter = defineModel<string | undefined>()
 const store = useStore()
 
 const remoteUsers = ref<User[]>([])
 const remoteChats = ref<Chat[]>([])
-const localChats = ref<Chat[]>([])
+const localChats = ref<Array<Chat & ChatRelations>>([])
+
 
 watch(filter, v => {
   onChatsStoreChange()
+
+  if (v) {
+    debouncer.request(`/v1/api/chat-search?name=${v}`)
+  } else {
+    debouncer.abort()
+  }
 }, { immediate: true })
 
 function onMenuItemClick(contact: {name: string}) {
@@ -100,24 +138,6 @@ const chats = computed(() => {
   }
 
   return chats
-})
-
-
-const debouncer = new FetchDebouncer({
-  onrequest: () => {
-    remoteUsers.value = []
-    remoteChats.value = []
-  },
-
-  onresult: ({ users, chats }: { users: User[], chats: Chat[] }) => {
-    remoteUsers.value = users || []
-    remoteChats.value = chats || []
-  },
-
-  onerror: (error: Error) => {
-    remoteUsers.value = []
-    remoteChats.value = []
-  },
 })
 
 

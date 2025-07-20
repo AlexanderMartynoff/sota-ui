@@ -1,7 +1,6 @@
 import { reactive, inject } from 'vue'
 import { defineStore } from 'pinia'
 import type { Account, IDB } from '../types'
-import { RecordType } from '../types'
 import * as db from '../library/idb'
 import { WebSocketQueue } from '../library/websocket'
 import { v4 as uuid4 } from 'uuid'
@@ -12,19 +11,17 @@ const activeAccountIdKey = 'activeAccountId'
 
 const useStore = defineStore('store', () => {
   const idb = inject<IDB>('idb') as IDB
-  const websocket = inject<WebSocketQueue>('websocket') as WebSocketQueue
+  const websocket = inject<WebSocketQueue>('websocket')
 
-  const account = reactive<Account>({} as Account)
+  const account = reactive<Account>({
+    id: uuid4(),
+    deviceId: uuid4(),
+    deviceName: navigator.userAgent,
+  } as Account)
+
   const activeAccountId = localStorage.getItem(activeAccountIdKey)
 
-  if (activeAccountId == null) {
-    Object.assign(account, {
-      id: uuid4(),
-      deviceId: uuid4(),
-      deviceName: navigator.userAgent,
-      name: 'Anoniomus',
-    })
-  } else {
+  if (activeAccountId != null) {
     db.run(async scope => db.getAccount(scope, activeAccountId), idb, ['accounts'], 'readonly').then(value => {
       if (value == undefined) {
         throw new Error('Invalid user account')

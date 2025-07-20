@@ -21,9 +21,9 @@ enum CloseCode {
 
 class WebSocketQueue {
   // timeout (ms) before open WS connection after abnormal closing
-  private reopenTimeout: number = 5_000
-  private messageTimeout: number = 50_000
-  private heartbeatTimeout: number = 25_000
+  private reopenTimeout: number
+  private messageTimeout: number
+  private heartbeatTimeout: number
 
   private heartbeatTimer: number = 0
 
@@ -34,7 +34,7 @@ class WebSocketQueue {
 
   private readonly waiters: Map<string, {resolve: (message: any) => void, reject: (reason?: any) => void}>
 
-  constructor(url: string, idb: IDBPDatabase, heartbeatTimeout: number, messageTimeout: number = 50_000, reopenTimeout: number = 5_000) {
+  constructor(url: string, idb: IDBPDatabase<any>, heartbeatTimeout: number, messageTimeout: number = 50_000, reopenTimeout: number = 5_000) {
 
     this.url = url
     this.idb = idb
@@ -47,12 +47,14 @@ class WebSocketQueue {
 
     // enter point
     this.emitter.on('websocket-open', () => {
-      console.debug('Open WS connection')
+      console.debug('[WS] Open connection')
 
       this.flush()
 
       if (this.heartbeatTimeout > 0) {
         // immitate heartbeat message from server for sending heartbeat back to server
+        console.debug('[WS] Enable heartbeat')
+
         this.emitter.emit('stage-message', {
           type: RecordType.StageMessage,
           message: {messageId: RecordType.HeartbeatMessage},
@@ -61,13 +63,9 @@ class WebSocketQueue {
     })
 
     this.emitter.on('stage-message', async (pkg: InputPackage<StageMessage>) => {
-      console.debug('Receive stage message', pkg)
-
       const waiter = this.waiters.get(pkg.message.messageId)
 
-      if (waiter != undefined) {
-        waiter.resolve(pkg)
-      }
+      waiter?.resolve(pkg)
 
       if (pkg.message.messageId != RecordType.HeartbeatMessage) {
         return
@@ -76,15 +74,18 @@ class WebSocketQueue {
       window.clearTimeout(this.heartbeatTimer)
 
       this.heartbeatTimer = window.setTimeout(() => {
+
         this.send({
           type: RecordType.HeartbeatMessage,
-          message: pkg.message,
+          message: {
+            id: RecordType.HeartbeatMessage,
+          },
         })
       }, this.heartbeatTimeout)
     })
 
     this.emitter.on('websocket-close', (event: CloseEvent) => {
-      console.debug('Close WS connection', event)
+      console.debug('[WS] Close connection', event)
 
       if (event.code == CloseCode.Stop) {
         return
@@ -117,7 +118,7 @@ class WebSocketQueue {
       throw new WebSocketStateError()
     }
 
-    console.log('Start WS opening WS', this.url)
+    console.log('[WS] Start opening', this.url)
 
     this.socket = new WebSocket(this.url)
 
@@ -135,6 +136,8 @@ class WebSocketQueue {
 
     this.socket.onmessage = (message: MessageEvent<string>) => {
       const record = JSON.parse(message.data) as InputPackage<Message | StageMessage | Event | Heartbeat>
+
+      console.debug(`[WS] Receive "${record.type}" message`, record)
 
       // user-message
       // stage-message
@@ -164,7 +167,7 @@ class WebSocketQueue {
 
     this.waiters.clear()
 
-    console.debug('Close WS connection', 'code', code, 'reason', reason)
+    console.debug('[WS] Close connection', 'code', code, 'reason', reason)
   }
 
   send(pkg: OutputPackage<Message | StageMessage | Heartbeat | CommandMessage>, awaitable: boolean = true) {
@@ -174,7 +177,7 @@ class WebSocketQueue {
 
     this.socket.send(JSON.stringify(pkg))
 
-    console.debug('Write message to socket', pkg)
+    console.debug(`[WS] Write "${pkg.type}" message`, pkg)
 
     if (awaitable) {
       this.wait(pkg.message.id)
@@ -197,9 +200,7 @@ class WebSocketQueue {
     let timer: number
 
     const clear = () => {
-      if (this.waiters.has(id)) {
-        this.waiters.delete(id)
-      }
+      this.waiters.delete(id)
 
       if (timer != undefined) {
         window.clearTimeout(timer)

@@ -146,10 +146,10 @@ interface Chat {
 
 interface ChatRelations {
   caption?: {
-    files?: any[],
     avatar?: File,
     author?: string,
     text?: string,
+    time?: number,
   }
 }
 
@@ -219,11 +219,11 @@ export {
   TaskStates,
   MessageStage,
   ChatType,
+  EventType,
 }
 
 export type {
   ServerError,
-  EventType,
   OnMessageSendedEvent,
   Event,
   DatabseSchema,

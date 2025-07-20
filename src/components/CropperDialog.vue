@@ -21,7 +21,7 @@
 
 
 <script setup lang="ts">
-import { useTemplateRef, nextTick, onMounted } from 'vue'
+import { useTemplateRef, nextTick } from 'vue'
 import { useCropper } from '../library/cropper'
 import { ViewfinderCircleIcon, ChevronLeftIcon } from '@heroicons/vue/24/solid'
 import Toolbar from './Toolbar.vue'

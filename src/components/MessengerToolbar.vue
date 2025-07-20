@@ -1,9 +1,14 @@
 <template>
   <Toolbar class="x-toolbar p-1">
     <FormText ref="input" @input="value => text = value">
+      <template #prepend>
+        <Button class="w-13 flex" @click="onSendBtnClick">
+          <PaperClipIcon class="size-6"/>
+        </Button>
+      </template>
       <template #append>
-        <Button class="w-13 h-full flex" @click="onSendBtnClick">
-          <PaperAirplaneIcon class="size-10"/>
+        <Button class="w-13 flex" @click="onSendBtnClick">
+          <PaperAirplaneIcon class="size-6"/>
         </Button>
       </template>
     </FormText>
@@ -13,7 +18,7 @@
 
 <script lang="ts" setup>
 import { ref, useTemplateRef, onMounted, onBeforeUnmount } from 'vue'
-import { PaperAirplaneIcon } from '@heroicons/vue/24/solid'
+import { PaperAirplaneIcon, PaperClipIcon } from '@heroicons/vue/24/solid'
 import Toolbar from '../components/Toolbar.vue'
 import FormText from '../components/form/FormText.vue'
 import Button from './Button.vue'

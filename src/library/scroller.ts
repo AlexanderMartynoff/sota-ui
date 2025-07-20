@@ -66,7 +66,7 @@ class Scroller {
     this.active = true
     this.target = target
 
-    const processOverlap = () => {
+    const apply = () => {
       if (this.loading || !this.active) {
         return
       }
@@ -100,7 +100,7 @@ class Scroller {
       window.clearTimeout(this.debounceTimer)
 
       this.debounceTimer = window.setTimeout(() => {
-        processOverlap()
+        apply()
 
         if (onScroll) {
           onScroll(this.scrollTop, this.scrollHeight - this.scrollTop - this.height)

@@ -17,9 +17,12 @@ app.use(router)
 
 
 database.setup().then(idb => {
+  const websocket = new WebSocketQueue(`ws://${location.host}/v1/serve`, idb, 30_000, 30_000)
+  const emitter = new Emitter()
+
   app.provide('idb', idb)
-  app.provide('websocket', new WebSocketQueue(`ws://${location.host}/v1/serve`, idb, 10000, 10000))
-  app.provide('emitter', new Emitter())
+  app.provide('websocket', websocket)
+  app.provide('emitter', emitter)
 
   app.mount('#root')
 })

@@ -7,7 +7,7 @@
         </Button>
         <span class="flex-auto"/>
         <Button toolbar>
-          <Cog8ToothIcon @click="onSettingsBtnClick" class="size-8" />
+          <Cog8ToothIcon @click="onAccountBtnClick" class="size-8" />
         </Button>
       </Toolbar>
     </LayoutHeader>
@@ -28,7 +28,7 @@ import LayoutContent from '../components/layout/LayoutContent.vue'
 import Layout from '../components/layout/Layout.vue'
 import Button from '../components/Button.vue'
 import Toolbar from '../components/Toolbar.vue'
-import { Cog8ToothIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/solid'
+import { Cog8ToothIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 
 
 const router = useRouter()
@@ -49,7 +49,7 @@ function onChatSelect(chat: any) {
   })
 }
 
-function onSettingsBtnClick() {
-  router.push({name: 'settings'})
+function onAccountBtnClick() {
+  router.push({name: 'account'})
 }
 </script>

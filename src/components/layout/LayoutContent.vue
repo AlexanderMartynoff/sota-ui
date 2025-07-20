@@ -19,11 +19,12 @@ const element = useTemplateRef('element')
 const view = inject<ComputedRef<'shh-scc-sff' | 'hhh-ccc' | 'hhh-ccc-fff'>>('view')
 
 const views: {
-  [key in 'shh-scc-sff' | 'hhh-ccc' | 'hhh-ccc-fff']: string[]
+  [key in 'shh-scc-sff' | 'hhh-ccc' | 'hhh-ccc-fff' | 'ccc']: string[]
 } = {
   'shh-scc-sff': ['row-start-2', 'row-end-3', 'col-start-2', 'col-end-3'],
   'hhh-ccc': ['row-start-2', 'row-end-3', 'col-start-1', 'col-end-2'],
   'hhh-ccc-fff': ['row-start-2', 'row-end-3', 'col-start-1', 'col-end-2'],
+  'ccc': ['row-start-1', 'row-end-2', 'col-start-1', 'col-end-2'],
 }
 
 const classes = computed(() => view?.value ? views[view.value] : [])

@@ -1,7 +1,7 @@
 <template>
   <Layout view="hhh-ccc-fff" class="x-messenger">
     <LayoutContent ref="scrolling" :key="chat.id" scroll="auto" class="bg-gray-50">
-      <MessengerMessage :name="message.senderName" :message="message.text" datetime="00:00" mode="sended" v-for="message in messages" :key="message.id" v-memo="[message.stage, message.text]">
+      <MessengerMessage :name="message.senderName" :message="message.text" :datetime="message.createTime" :mode="store.account.id == message.sender?.id ? 'sended' : 'received'" v-for="message in messages" :key="message.id" :stage="message.stage" v-memo="[message.stage, message.text]">
         <template #icon>
           <Avatar size="xs" :file="store.account.avatar"/>
         </template>
@@ -64,43 +64,20 @@ function selectMessages() {
 }
 
 
-async function onMessagesStoreChange() {
+async function onMessagesStoreChange(scroll: boolean) {
   const { records } = await selectMessages()
 
   messages.value = records
 
-  nextTick().then(() => {
-    scroller.toStartPosition()
-  })
+  if (scroll) {
+    nextTick(() => {
+      scroller.toStartPosition()
+    })
+  }
 }
 
 async function onSendBtnClick({ text }: {text: string}) {
-  const message = {
-    id: uuid4(),
-    chatId: props.chat.id,
-    senderId: store.account.id,
-    senderDeviceId: store.account.deviceId,
-    senderName: store.account.name,
-    senderChatName: props.chat.name,
-    senderChatChannel: props.chat.chanel,
-    stage: MessageStage.SenderCreated,
-    createTime: Date.now(),
-    text,
-  }
-
-  const task = {
-    id: uuid4(),
-    state: TaskStates.Ready,
-    changeStateTime: Date.now(),
-    createTime: Date.now(),
-    payload: {
-      message,
-      type: RecordType.UserMessage,
-      chanel: props.chat.chanel,
-    },
-  }
-
-  await db.run(async (scope, tx) => {
+  const { message, task } = await db.run(async (scope, tx) => {
     // 1. add chat if missing
     if (await db.getChat(scope, props.chat.id) == undefined) {
       db.addChat(scope, {...props.chat})
@@ -111,10 +88,34 @@ async function onSendBtnClick({ text }: {text: string}) {
     }
 
     // 2. add message
-    db.addMessage(scope, message)
+    const message = await db.addMessage(scope, {
+      id: uuid4(),
+      chatId: props.chat.id,
+      senderId: store.account.id,
+      senderDeviceId: store.account.deviceId,
+      senderName: store.account.name,
+      senderChatName: props.chat.name,
+      senderChatChannel: props.chat.chanel,
+      stage: MessageStage.SenderCreated,
+      text,
+    })
+
+    const task = {
+      id: uuid4(),
+      state: TaskStates.Ready,
+      changeStateTime: Date.now(),
+      createTime: Date.now(),
+      payload: {
+        message,
+        type: RecordType.UserMessage,
+        chanel: props.chat.chanel,
+      },
+    }
 
     // 3. add tasks for sending message with WS
     db.addTask(scope, task)
+
+    return {message, task}
   }, idb, ['tasks', 'messages', 'chats'], 'readwrite')
 
   emitter.emit('tasks.created', { task })
@@ -126,13 +127,19 @@ function onToDownBtnClick() {
 }
 
 onEmit([
+  'messages.created',
+], (event) => {
+  onMessagesStoreChange(true)
+}, emitter)
+
+
+onEmit([
   'messages.stage.changed',
   'account.updated',
   'messages.updated',
-  'messages.created',
   'messages.deleted'
 ], (event) => {
-  onMessagesStoreChange()
+  onMessagesStoreChange(false)
 }, emitter)
 
 
@@ -154,7 +161,7 @@ onMounted(() => {
     messages.value = records
 
     // await for DOM change
-    nextTick().then(() => {
+    nextTick(() => {
       stop(finish)
     })
   }, (scrollTop, scrollBottom) => {

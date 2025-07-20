@@ -61,6 +61,7 @@ async function selectChats(scope: Scope<DatabseSchema, ['chats', 'accounts', 'me
       caption: {
         author: captionAccountCursor?.value.name,
         text: captionMessageCursor?.value.text,
+        time: captionMessageCursor?.value.createTime,
       },
     })
   }
@@ -95,17 +96,21 @@ async function setMessageStage(scope: Scope<DatabseSchema, ['messages'], 'readwr
   })
 }
 
-async function addMessage(scope: Scope<DatabseSchema, ['messages'], 'readwrite'>, values: Omit<Message, 'sequence' | 'createTime'>): Promise<void> {
+async function addMessage(scope: Scope<DatabseSchema, ['messages'], 'readwrite'>, values: Omit<Message, 'sequence' | 'createTime'>): Promise<Message> {
   const lastMessageCursor = await scope.messages.index('chat+sequence').openCursor(IDBKeyRange.bound(
     [values.chatId, Number.MIN_SAFE_INTEGER],
     [values.chatId, Number.MAX_SAFE_INTEGER],
   ), 'prev')
 
-  await scope.messages.add({
+  const message = {
     ...values,
     createTime: Date.now(),
     sequence: lastMessageCursor ? lastMessageCursor.value.sequence + 1 : 1,
-  })
+  }
+
+  await scope.messages.add(message)
+
+  return message
 }
 
 async function putMessage(scope: Scope<DatabseSchema, ['chats', 'messages', 'accounts'], 'readwrite'>, message: Message) {

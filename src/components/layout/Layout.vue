@@ -22,7 +22,7 @@ const props = defineProps({
   },
 
   view: {
-    type: String as PropType<'shh-scc-sff' | 'hhh-ccc' | 'hhh-ccc-fff'>,
+    type: String as PropType<'shh-scc-sff' | 'hhh-ccc' | 'hhh-ccc-fff' | 'ccc'>,
     required: true,
   },
 
@@ -70,7 +70,7 @@ const size = computed(() => {
 })
 
 const views: ComputedRef<{
-  [key in 'shh-scc-sff' | 'hhh-ccc' | 'hhh-ccc-fff']: string[]
+  [key in 'shh-scc-sff' | 'hhh-ccc' | 'hhh-ccc-fff' | 'ccc']: string[]
 }> = computed(() => ({
   'shh-scc-sff': [
     'grid-rows-[max-content_1fr_max-content]',
@@ -91,6 +91,7 @@ const views: ComputedRef<{
   ],
   'hhh-ccc': ['grid-rows-[max-content_1fr]', 'grid-cols-1'],
   'hhh-ccc-fff': ['grid-rows-[max-content_1fr_max-content]', 'grid-cols-1'],
+  'ccc': ['grid-cols-1', 'grid-rows-1'],
 }))
 
 const classes = computed(() => views.value[props.view])

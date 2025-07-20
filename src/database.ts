@@ -1,9 +1,8 @@
 import { openDB } from 'idb'
-import type { IDBPDatabase } from 'idb'
-import type { App } from 'vue'
+import type { IDB, DatabseSchema } from './types'
 
 
-function setup_v1(idb: IDBPDatabase) {
+function setup_v1(idb: IDB) {
   // Chats
   const chats = idb.createObjectStore('chats', {
     keyPath: 'id',
@@ -42,9 +41,8 @@ function setup_v1(idb: IDBPDatabase) {
   accounts.createIndex('id', ['id'])
 }
 
-
 async function setup() {
-  const idb = await openDB('messenger', 1, {
+  const idb = await openDB<DatabseSchema>('messenger', 1, {
     upgrade(idb, fromVersion, toVersion) {
       switch (fromVersion) {
         case 0:

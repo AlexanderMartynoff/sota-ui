@@ -7,12 +7,12 @@
         </Button>
 
         <span class="flex-1 truncate font-medium *:align-middle">
-          <UserCircleIcon class="text-gray-300 size-10 mx-2 inline" /> 
+          <UserCircleIcon class="text-gray-400 size-10 mx-2 inline" /> 
           <span>
             {{chat.name}}
           </span>
         </span>
-        <Button @click="onSettingsBtnClick" class="*:size-8" toolbar>
+        <Button @click="onAccountBtnClick" class="*:size-8" toolbar>
           <Cog8ToothIcon />
         </Button>
       </Toolbar>
@@ -33,7 +33,7 @@
 import { ref, watch, inject } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ChatType, type Chat, type IDB } from '../types.ts'
-import { UserCircleIcon, ChevronDoubleLeftIcon, Cog8ToothIcon } from '@heroicons/vue/24/solid'
+import { UserCircleIcon, ChevronDoubleLeftIcon, Cog8ToothIcon } from '@heroicons/vue/24/outline'
 import Messenger from '../components/Messenger.vue'
 import Toolbar from '../components/Toolbar.vue'
 import Button from '../components/Button.vue'
@@ -89,11 +89,11 @@ watch(() => props.chatId, async () => {
 
 
 function onContactsBtnClick() {
-  router.push({name: 'contacts'})
+  router.push({name: 'contact-list'})
 }
 
-function onSettingsBtnClick() {
-  router.push({name: 'settings'})
+function onAccountBtnClick() {
+  router.push({name: 'account'})
 }
 
 function onContactSelect(chat: Chat) {
